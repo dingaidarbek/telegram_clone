@@ -1,10 +1,10 @@
 import { useState, useRef, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
-import type { Message, Chat } from '../types/chat'
+import type { Message, ChatData } from '../types/chat'
 import { themeClasses } from '../styles/theme'
 
 interface ChatWindowProps {
-    chat: Chat
+    chat: ChatData
     messages: Message[]
     onSendMessage: (text: string) => void
 }

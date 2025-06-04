@@ -5,7 +5,7 @@ export interface Message {
     isOutgoing: boolean
 }
 
-export interface Chat {
+export interface ChatData {
     id: string
     name: string
     avatar: string

@@ -3,15 +3,15 @@ import { useState, useEffect } from 'react'
 import ChatList from '../components/ChatList'
 import ChatWindow from '../components/ChatWindow'
 import { chats as initialChats, messages as initialMessages } from '../data/mockData'
-import type { Chat, Message } from '../types/chat'
+import type { ChatData, Message } from '../types/chat'
 
 function Chat() {
     const { chatId } = useParams()
-    const [chats, setChats] = useState<Chat[]>(initialChats)
+    const [chats, setChats] = useState<ChatData[]>(initialChats)
     const [messages, setMessages] = useState<Record<string, Message[]>>(initialMessages)
     const currentChat = chats.find(chat => chat.id === chatId)
 
-    const handleAddChat = (newChat: Chat) => {
+    const handleAddChat = (newChat: ChatData) => {
         setChats(prevChats => [...prevChats, newChat])
         setMessages(prevMessages => ({
             ...prevMessages,
