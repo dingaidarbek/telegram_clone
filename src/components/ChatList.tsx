@@ -5,10 +5,9 @@ import { themeClasses } from '../styles/theme'
 
 interface ChatListProps {
     chats: ChatData[]
-    onAddChat: (chat: ChatData) => void
 }
 
-function ChatList({ chats, onAddChat }: ChatListProps) {
+function ChatList({ chats }: ChatListProps) {
     const { chatId } = useParams()
     const [searchQuery, setSearchQuery] = useState('')
 

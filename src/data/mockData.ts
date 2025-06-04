@@ -1,34 +1,35 @@
-import type { Chat, Message } from '../types/chat'
+import type { ChatData, Message } from '../types/chat'
 
-export const chats: Chat[] = [
+export const chats: ChatData[] = [
     {
         id: '1',
-        name: 'John Doe',
+        name: 'Jane Smith',
         avatar: 'https://i.pravatar.cc/150?img=1',
         lastMessage: 'Hey, how are you?',
-        lastMessageTime: '10:30',
+        lastMessageTime: '10:30 AM',
         unreadCount: 2,
-        isOnline: true
-    },
-    {
-        id: '2',
-        name: 'Jane Smith',
-        avatar: 'https://i.pravatar.cc/150?img=2',
-        lastMessage: 'See you tomorrow!',
-        lastMessageTime: '09:15',
-        unreadCount: 0,
         isOnline: false,
         lastSeen: 'last seen recently'
     },
     {
-        id: '3',
+        id: '2',
         name: 'Mike Johnson',
-        avatar: 'https://i.pravatar.cc/150?img=3',
-        lastMessage: 'The meeting is at 2 PM',
+        avatar: 'https://i.pravatar.cc/150?img=2',
+        lastMessage: 'See you tomorrow!',
         lastMessageTime: 'Yesterday',
-        unreadCount: 1,
+        unreadCount: 0,
         isOnline: false,
         lastSeen: 'last seen yesterday at 15:30'
+    },
+    {
+        id: '3',
+        name: 'Sarah Wilson',
+        avatar: 'https://i.pravatar.cc/150?img=3',
+        lastMessage: 'Thanks for the help!',
+        lastMessageTime: 'Yesterday',
+        unreadCount: 1,
+        isOnline: true,
+        lastSeen: 'online'
     }
 ]
 
@@ -37,58 +38,52 @@ export const messages: Record<string, Message[]> = {
         {
             id: '1',
             text: 'Hey, how are you?',
-            time: '10:30',
+            time: '10:30 AM',
             isOutgoing: false
         },
         {
             id: '2',
             text: 'I\'m good, thanks! How about you?',
-            time: '10:31',
+            time: '10:31 AM',
             isOutgoing: true
-        },
-        {
-            id: '3',
-            text: 'Doing great! Just finished the project we discussed.',
-            time: '10:32',
-            isOutgoing: false
         }
     ],
     '2': [
         {
-            id: '4',
-            text: 'Are we still on for tomorrow?',
-            time: '09:14',
-            isOutgoing: true
-        },
-        {
-            id: '5',
-            text: 'Yes, absolutely!',
-            time: '09:15',
+            id: '1',
+            text: 'Are we still meeting tomorrow?',
+            time: 'Yesterday',
             isOutgoing: false
         },
         {
-            id: '6',
-            text: 'See you tomorrow!',
-            time: '09:15',
+            id: '2',
+            text: 'Yes, at 2 PM!',
+            time: 'Yesterday',
             isOutgoing: true
+        },
+        {
+            id: '3',
+            text: 'See you tomorrow!',
+            time: 'Yesterday',
+            isOutgoing: false
         }
     ],
     '3': [
         {
-            id: '7',
-            text: 'Don\'t forget about the meeting',
+            id: '1',
+            text: 'Can you help me with the project?',
             time: 'Yesterday',
             isOutgoing: false
         },
         {
-            id: '8',
-            text: 'What time is it again?',
+            id: '2',
+            text: 'Of course! What do you need?',
             time: 'Yesterday',
             isOutgoing: true
         },
         {
-            id: '9',
-            text: 'The meeting is at 2 PM',
+            id: '3',
+            text: 'Thanks for the help!',
             time: 'Yesterday',
             isOutgoing: false
         }

@@ -11,14 +11,6 @@ function Chat() {
     const [messages, setMessages] = useState<Record<string, Message[]>>(initialMessages)
     const currentChat = chats.find(chat => chat.id === chatId)
 
-    const handleAddChat = (newChat: ChatData) => {
-        setChats(prevChats => [...prevChats, newChat])
-        setMessages(prevMessages => ({
-            ...prevMessages,
-            [newChat.id]: []
-        }))
-    }
-
     const handleSendMessage = (text: string) => {
         if (!chatId) return
 
@@ -55,7 +47,7 @@ function Chat() {
         <div className="min-h-[100dvh] w-full flex">
             {/* Chat List - Always visible on desktop, conditionally visible on mobile */}
             <div className={`${chatId ? 'hidden md:block' : 'block'} w-full md:w-80`}>
-                <ChatList chats={chats} onAddChat={handleAddChat} />
+                <ChatList chats={chats} />
             </div>
 
             {/* Chat Window - Only visible when a chat is selected */}
