@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react'
 import { useParams, useNavigate } from 'react-router-dom'
 import ChatList from '../components/ChatList'
 import ChatWindow from '../components/ChatWindow'
+import AIChatWindow from '../components/AIChatWindow'
 import { chats as mockChats, messages as mockMessages } from '../data/mockData'
 import type { Message, ChatData } from '../types/chat'
 import { storage } from '../utils/storage'
@@ -73,34 +74,76 @@ function Chat() {
         navigate(`/chat/${chat.id}`)
     }
 
-    const handleSendMessage = (text: string) => {
+    const handleSendMessage = (messageOrText: Message | string) => {
         if (selectedChat) {
-            const trimmedText = text.trim()
-            if (!trimmedText) return // Don't send empty messages
+            let newMessage: Message
 
-            const now = new Date()
-            const formattedTime = formatMessageTime(now.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }))
+            if (typeof messageOrText === 'string') {
+                const trimmedText = messageOrText.trim()
+                if (!trimmedText) return // Don't send empty messages
 
-            const newMessage: Message = {
-                id: Date.now().toString(),
-                chatId: selectedChat.id,
-                text: trimmedText,
-                time: formattedTime,
-                isOutgoing: true
+                const now = new Date()
+                const formattedTime = formatMessageTime(now.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }))
+
+                newMessage = {
+                    id: Date.now().toString(),
+                    chatId: selectedChat.id,
+                    text: trimmedText,
+                    time: formattedTime,
+                    isOutgoing: true
+                }
+            } else {
+                newMessage = messageOrText
             }
 
-            // Update messages
-            const updatedMessages = [...messages, newMessage]
-            setMessages(updatedMessages)
+            // Update messages by appending the new message
+            setMessages(prevMessages => [...prevMessages, newMessage])
 
             // Update storage with new messages
             const allMessages = storage.getMessages()
+            const updatedMessages = [...(allMessages[selectedChat.id] || []), newMessage]
             storage.setMessages({ ...allMessages, [selectedChat.id]: updatedMessages })
 
             // Update chat list with new last message
             updateChatLastMessage(selectedChat.id, updatedMessages)
         }
     }
+
+    const handleAddChat = (name: string) => {
+        const newChat: ChatData = {
+            id: Date.now().toString(),
+            name,
+            avatar: `https://api.dicebear.com/7.x/avataaars/svg?seed=${name}`,
+            lastMessage: '',
+            lastMessageTime: '',
+            unreadCount: 0,
+            isOnline: false
+        }
+
+        const updatedChats = [...chats, newChat]
+        setChats(updatedChats)
+        storage.setChats(updatedChats)
+        navigate(`/chat/${newChat.id}`)
+    }
+
+    // Add AI chat if it doesn't exist
+    useEffect(() => {
+        const aiChatExists = chats.some(chat => chat.id === 'ai')
+        if (!aiChatExists) {
+            const aiChat: ChatData = {
+                id: 'ai',
+                name: 'AI Assistant',
+                avatar: 'https://api.dicebear.com/7.x/avataaars/svg?seed=ai',
+                lastMessage: 'Hello! How can I help you today?',
+                lastMessageTime: formatMessageTime(new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })),
+                unreadCount: 0,
+                isOnline: true
+            }
+            const updatedChats = [...chats, aiChat]
+            setChats(updatedChats)
+            storage.setChats(updatedChats)
+        }
+    }, [])
 
     return (
         <div className="h-[100dvh] flex overflow-hidden bg-white dark:bg-gray-900">
@@ -110,17 +153,25 @@ function Chat() {
                     chats={chats}
                     selectedChat={selectedChat}
                     onChatSelect={handleChatSelect}
+                    onAddChat={handleAddChat}
                 />
             </div>
 
             {/* Chat Window - Only shown when chat is selected */}
             {selectedChat ? (
                 <div className="flex-1 min-w-0">
-                    <ChatWindow
-                        chat={selectedChat}
-                        messages={messages}
-                        onSendMessage={handleSendMessage}
-                    />
+                    {selectedChat.id === 'ai' ? (
+                        <AIChatWindow
+                            messages={messages}
+                            onSendMessage={handleSendMessage}
+                        />
+                    ) : (
+                        <ChatWindow
+                            chat={selectedChat}
+                            messages={messages}
+                            onSendMessage={handleSendMessage}
+                        />
+                    )}
                 </div>
             ) : (
                 // Show message on desktop when no chat is selected

@@ -3,16 +3,23 @@ import type { ChatData } from '../types/chat'
 import { themeClasses } from '../styles/theme'
 import { useTheme } from '../context/ThemeContext'
 import CachedAvatar from './CachedAvatar'
+import NewChatModal from './NewChatModal'
 
 interface ChatListProps {
     chats: ChatData[]
     selectedChat: ChatData | null
     onChatSelect: (chat: ChatData) => void
+    onAddChat: (name: string) => void
 }
 
-function ChatList({ chats, selectedChat, onChatSelect }: ChatListProps) {
+function ChatList({ chats, selectedChat, onChatSelect, onAddChat }: ChatListProps) {
     const [searchQuery, setSearchQuery] = useState('')
+    const [isNewChatModalOpen, setIsNewChatModalOpen] = useState(false)
     const { theme, toggleTheme } = useTheme()
+
+    // Separate AI chats from regular chats
+    const aiChats = chats.filter(chat => chat.id === 'ai')
+    const regularChats = chats.filter(chat => chat.id !== 'ai')
 
     const filteredChats = chats.filter(chat =>
         chat.name.toLowerCase().includes(searchQuery.toLowerCase())
@@ -20,24 +27,34 @@ function ChatList({ chats, selectedChat, onChatSelect }: ChatListProps) {
 
     return (
         <div className="h-full w-full flex flex-col bg-white dark:bg-gray-900">
-            <div className="p-4 border-b border-gray-200 dark:border-gray-700">
+            <div className={`${themeClasses.chatHeader} bg-white dark:bg-gray-900`}>
                 <div className="flex items-center justify-between">
                     <h1 className="text-xl font-semibold text-gray-900 dark:text-gray-100">Chats</h1>
-                    <button
-                        onClick={toggleTheme}
-                        className={themeClasses.themeToggle}
-                        aria-label="Toggle theme"
-                    >
-                        {theme === 'light' ? (
-                            <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z" />
+                    <div className="flex items-center space-x-2">
+                        <button
+                            onClick={() => setIsNewChatModalOpen(true)}
+                            className="p-2 rounded-full hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors"
+                        >
+                            <svg className="w-5 h-5 text-gray-600 dark:text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
                             </svg>
-                        ) : (
-                            <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z" />
-                            </svg>
-                        )}
-                    </button>
+                        </button>
+                        <button
+                            onClick={toggleTheme}
+                            className={themeClasses.themeToggle}
+                            aria-label="Toggle theme"
+                        >
+                            {theme === 'light' ? (
+                                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z" />
+                                </svg>
+                            ) : (
+                                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z" />
+                                </svg>
+                            )}
+                        </button>
+                    </div>
                 </div>
                 <input
                     type="text"
@@ -48,39 +65,105 @@ function ChatList({ chats, selectedChat, onChatSelect }: ChatListProps) {
                 />
             </div>
             <div className="flex-1 overflow-y-auto">
-                {filteredChats.map((chat) => (
-                    <div
-                        key={chat.id}
-                        onClick={() => onChatSelect(chat)}
-                        className={`${themeClasses.chatItem} ${selectedChat?.id === chat.id ? themeClasses.chatItemActive : ''}`}
-                    >
-                        <div className="relative mr-3">
-                            <CachedAvatar
-                                src={chat.avatar}
-                                alt={chat.name}
-                                className={themeClasses.avatar}
-                            />
-                            {chat.isOnline && (
-                                <div className={themeClasses.onlineIndicator} />
-                            )}
-                        </div>
-                        <div className="flex-1 min-w-0">
-                            <div className="flex items-center justify-between">
-                                <h3 className={themeClasses.chatItemName}>{chat.name}</h3>
-                                <span className={themeClasses.chatItemTime}>{chat.lastMessageTime}</span>
-                            </div>
-                            <div className="flex items-center justify-between">
-                                <p className={themeClasses.chatItemLastMessage}>{chat.lastMessage}</p>
-                                {chat.unreadCount > 0 && (
-                                    <span className={themeClasses.chatItemUnread}>
-                                        {chat.unreadCount}
-                                    </span>
-                                )}
-                            </div>
+                {/* AI Chats Section */}
+                {aiChats.length > 0 && (
+                    <div className="px-4 py-2">
+                        <h2 className="text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider">
+                            AI Assistant
+                        </h2>
+                        <div className="mt-2 space-y-1">
+                            {aiChats.map(chat => (
+                                <button
+                                    key={chat.id}
+                                    onClick={() => onChatSelect(chat)}
+                                    className={`w-full flex items-center p-3 rounded-lg transition-colors ${selectedChat?.id === chat.id
+                                            ? 'bg-blue-50 dark:bg-blue-900/20'
+                                            : 'hover:bg-gray-50 dark:hover:bg-gray-800'
+                                        }`}
+                                >
+                                    <img
+                                        src={chat.avatar}
+                                        alt={chat.name}
+                                        className="w-10 h-10 rounded-full mr-3"
+                                    />
+                                    <div className="flex-1 min-w-0">
+                                        <div className="flex items-center justify-between">
+                                            <h3 className="text-sm font-medium text-gray-900 dark:text-gray-100 truncate">
+                                                {chat.name}
+                                            </h3>
+                                            {chat.lastMessageTime && (
+                                                <span className="text-xs text-gray-500 dark:text-gray-400">
+                                                    {chat.lastMessageTime}
+                                                </span>
+                                            )}
+                                        </div>
+                                        <p className="text-sm text-gray-500 dark:text-gray-400 truncate">
+                                            {chat.lastMessage || 'No messages yet'}
+                                        </p>
+                                    </div>
+                                    {chat.unreadCount > 0 && (
+                                        <div className="ml-2 bg-blue-500 text-white text-xs font-medium px-2 py-1 rounded-full">
+                                            {chat.unreadCount}
+                                        </div>
+                                    )}
+                                </button>
+                            ))}
                         </div>
                     </div>
-                ))}
+                )}
+
+                {/* Regular Chats Section */}
+                {regularChats.length > 0 && (
+                    <div className="px-4 py-2">
+                        <h2 className="text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider">
+                            People
+                        </h2>
+                        <div className="mt-2 space-y-1">
+                            {regularChats.map(chat => (
+                                <button
+                                    key={chat.id}
+                                    onClick={() => onChatSelect(chat)}
+                                    className={`w-full flex items-center p-3 rounded-lg transition-colors ${selectedChat?.id === chat.id
+                                            ? 'bg-blue-50 dark:bg-blue-900/20'
+                                            : 'hover:bg-gray-50 dark:hover:bg-gray-800'
+                                        }`}
+                                >
+                                    <img
+                                        src={chat.avatar}
+                                        alt={chat.name}
+                                        className="w-10 h-10 rounded-full mr-3"
+                                    />
+                                    <div className="flex-1 min-w-0">
+                                        <div className="flex items-center justify-between">
+                                            <h3 className="text-sm font-medium text-gray-900 dark:text-gray-100 truncate">
+                                                {chat.name}
+                                            </h3>
+                                            {chat.lastMessageTime && (
+                                                <span className="text-xs text-gray-500 dark:text-gray-400">
+                                                    {chat.lastMessageTime}
+                                                </span>
+                                            )}
+                                        </div>
+                                        <p className="text-sm text-gray-500 dark:text-gray-400 truncate">
+                                            {chat.lastMessage || 'No messages yet'}
+                                        </p>
+                                    </div>
+                                    {chat.unreadCount > 0 && (
+                                        <div className="ml-2 bg-blue-500 text-white text-xs font-medium px-2 py-1 rounded-full">
+                                            {chat.unreadCount}
+                                        </div>
+                                    )}
+                                </button>
+                            ))}
+                        </div>
+                    </div>
+                )}
             </div>
+            <NewChatModal
+                isOpen={isNewChatModalOpen}
+                onClose={() => setIsNewChatModalOpen(false)}
+                onAddChat={onAddChat}
+            />
         </div>
     )
 }
