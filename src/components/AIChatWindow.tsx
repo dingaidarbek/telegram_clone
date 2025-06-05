@@ -1,20 +1,22 @@
 import { useState, useRef, useEffect } from 'react'
-import type { Message } from '../types/chat'
+import { useNavigate } from 'react-router-dom'
+import type { Message, ChatData } from '../types/chat'
 import { themeClasses } from '../styles/theme'
 import MessageGroup from './MessageGroup'
 import { getMessageDate } from '../utils/date'
 import { generateAIResponse } from '../utils/gemini'
-import { formatMessageTime } from '../utils/date'
 
 interface AIChatWindowProps {
+    chat: ChatData
     messages: Message[]
     onSendMessage: (message: Message) => void
 }
 
-function AIChatWindow({ messages, onSendMessage }: AIChatWindowProps) {
+function AIChatWindow({ chat, messages, onSendMessage }: AIChatWindowProps) {
     const [newMessage, setNewMessage] = useState('')
     const [isLoading, setIsLoading] = useState(false)
     const messagesEndRef = useRef<HTMLDivElement>(null)
+    const navigate = useNavigate()
 
     const scrollToBottom = () => {
         messagesEndRef.current?.scrollIntoView({ behavior: 'auto' })
@@ -26,44 +28,34 @@ function AIChatWindow({ messages, onSendMessage }: AIChatWindowProps) {
 
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault()
-        if (newMessage.trim() && !isLoading) {
-            const userMessage = newMessage.trim()
-            setNewMessage('') // Clear input immediately after getting the message
-            setIsLoading(true)
-
-            const now = new Date()
-            const formattedTime = formatMessageTime(now.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }))
-
-            // Add user message
+        if (newMessage.trim()) {
             const userMessageObj: Message = {
                 id: Date.now().toString(),
-                chatId: 'ai',
-                text: userMessage,
-                time: formattedTime,
+                chatId: chat.id,
+                text: newMessage,
+                time: new Date().toISOString(),
                 isOutgoing: true
             }
             onSendMessage(userMessageObj)
+            setNewMessage('')
+            setIsLoading(true)
 
             try {
-                // Get AI response
-                const aiResponse = await generateAIResponse(userMessage)
-
-                // Add AI response as incoming
+                const response = await generateAIResponse(newMessage)
                 const aiMessageObj: Message = {
                     id: (Date.now() + 1).toString(),
-                    chatId: 'ai',
-                    text: aiResponse,
-                    time: formattedTime,
+                    chatId: chat.id,
+                    text: response,
+                    time: new Date().toISOString(),
                     isOutgoing: false
                 }
                 onSendMessage(aiMessageObj)
             } catch (error) {
-                console.error('Error getting AI response:', error)
                 const errorMessageObj: Message = {
                     id: (Date.now() + 1).toString(),
-                    chatId: 'ai',
+                    chatId: chat.id,
                     text: 'Sorry, I encountered an error. Please try again.',
-                    time: formattedTime,
+                    time: new Date().toISOString(),
                     isOutgoing: false
                 }
                 onSendMessage(errorMessageObj)
@@ -95,19 +87,27 @@ function AIChatWindow({ messages, onSendMessage }: AIChatWindowProps) {
     }, [])
 
     return (
-        <div className="h-full flex flex-col bg-gray-50 dark:bg-gray-900">
+        <div className="min-h-[100dvh] flex flex-col bg-gray-50 dark:bg-gray-900">
             {/* Chat Header */}
-            <div className={`${themeClasses.chatHeader} bg-white dark:bg-gray-900`}>
+            <div className={`${themeClasses.chatHeader} bg-white dark:bg-gray-900 flex-shrink-0`}>
                 <div className="flex items-center">
-                    <div className="w-10 h-10 rounded-full bg-blue-500 flex items-center justify-center mr-3">
-                        <svg className="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9.75 17L9 20l-1 1h8l-1-1-.75-3M3 13h18M5 17h14a2 2 0 002-2V5a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
+                    <button
+                        onClick={() => navigate('/chat')}
+                        className="md:hidden p-2 mr-2 rounded-full hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors"
+                    >
+                        <svg className="w-5 h-5 text-gray-600 dark:text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
                         </svg>
-                    </div>
+                    </button>
+                    <img
+                        src={chat.avatar}
+                        alt={chat.name}
+                        className="w-10 h-10 rounded-full mr-3"
+                    />
                     <div>
-                        <h2 className="text-lg font-semibold text-gray-900 dark:text-gray-100">AI Assistant</h2>
+                        <h2 className="text-lg font-semibold text-gray-900 dark:text-gray-100">{chat.name}</h2>
                         <p className="text-sm text-gray-500 dark:text-gray-400">
-                            {isLoading ? 'Typing...' : 'Online'}
+                            AI Assistant
                         </p>
                     </div>
                 </div>
@@ -119,17 +119,12 @@ function AIChatWindow({ messages, onSendMessage }: AIChatWindowProps) {
                     <MessageGroup key={index} messages={group} />
                 ))}
                 {isLoading && (
-                    <div className="flex items-start space-x-2">
-                        <div className="w-8 h-8 rounded-full bg-blue-500 flex-shrink-0 flex items-center justify-center">
-                            <svg className="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9.75 17L9 20l-1 1h8l-1-1-.75-3M3 13h18M5 17h14a2 2 0 002-2V5a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
-                            </svg>
-                        </div>
-                        <div className="bg-white dark:bg-gray-800 rounded-lg px-3 py-2 shadow-sm inline-block">
+                    <div className="flex justify-start">
+                        <div className="bg-white dark:bg-gray-800 rounded-lg p-3 shadow-sm inline-block">
                             <div className="flex space-x-1">
-                                <div className="w-1.5 h-1.5 bg-gray-400 dark:bg-gray-500 rounded-full animate-bounce" style={{ animationDelay: '0ms' }}></div>
-                                <div className="w-1.5 h-1.5 bg-gray-400 dark:bg-gray-500 rounded-full animate-bounce" style={{ animationDelay: '150ms' }}></div>
-                                <div className="w-1.5 h-1.5 bg-gray-400 dark:bg-gray-500 rounded-full animate-bounce" style={{ animationDelay: '300ms' }}></div>
+                                <div className="w-1.5 h-1.5 bg-gray-400 dark:bg-gray-500 rounded-full animate-bounce" style={{ animationDelay: '0ms' }} />
+                                <div className="w-1.5 h-1.5 bg-gray-400 dark:bg-gray-500 rounded-full animate-bounce" style={{ animationDelay: '150ms' }} />
+                                <div className="w-1.5 h-1.5 bg-gray-400 dark:bg-gray-500 rounded-full animate-bounce" style={{ animationDelay: '300ms' }} />
                             </div>
                         </div>
                     </div>
@@ -138,16 +133,15 @@ function AIChatWindow({ messages, onSendMessage }: AIChatWindowProps) {
             </div>
 
             {/* Input Area */}
-            <div className="p-4 border-t border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-900">
+            <div className="p-4 border-t border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-900 flex-shrink-0">
                 <div className="flex items-end">
                     <textarea
                         value={newMessage}
                         onChange={(e) => setNewMessage(e.target.value)}
                         onKeyDown={handleKeyDown}
-                        placeholder="Ask me anything..."
+                        placeholder="Type a message..."
                         className={`${themeClasses.messageInput} resize-none min-h-[40px] max-h-[120px] py-2`}
                         rows={1}
-                        disabled={isLoading}
                     />
                     <button
                         onClick={handleSubmit}

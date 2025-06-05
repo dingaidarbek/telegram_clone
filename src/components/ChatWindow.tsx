@@ -1,19 +1,22 @@
 import { useState, useRef, useEffect } from 'react'
+import { useNavigate } from 'react-router-dom'
 import type { Message, ChatData } from '../types/chat'
 import { themeClasses } from '../styles/theme'
 import CachedAvatar from './CachedAvatar'
 import MessageGroup from './MessageGroup'
 import { getMessageDate } from '../utils/date'
+import { formatMessageTime } from '../utils/date'
 
 interface ChatWindowProps {
     chat: ChatData
     messages: Message[]
-    onSendMessage: (text: string) => void
+    onSendMessage: (message: Message) => void
 }
 
 function ChatWindow({ chat, messages, onSendMessage }: ChatWindowProps) {
     const [newMessage, setNewMessage] = useState('')
     const messagesEndRef = useRef<HTMLDivElement>(null)
+    const navigate = useNavigate()
 
     const scrollToBottom = () => {
         messagesEndRef.current?.scrollIntoView({ behavior: 'auto' })
@@ -26,7 +29,14 @@ function ChatWindow({ chat, messages, onSendMessage }: ChatWindowProps) {
     const handleSubmit = (e: React.FormEvent) => {
         e.preventDefault()
         if (newMessage.trim()) {
-            onSendMessage(newMessage)
+            const message: Message = {
+                id: Date.now().toString(),
+                chatId: chat.id,
+                text: newMessage,
+                time: new Date().toISOString(),
+                isOutgoing: true
+            }
+            onSendMessage(message)
             setNewMessage('')
         }
     }
@@ -53,24 +63,29 @@ function ChatWindow({ chat, messages, onSendMessage }: ChatWindowProps) {
     }, [])
 
     return (
-        <div className="h-full flex flex-col bg-gray-50 dark:bg-gray-900">
+        <div className="min-h-[100dvh] flex flex-col bg-gray-50 dark:bg-gray-900">
             {/* Chat Header */}
-            <div className={`${themeClasses.chatHeader} bg-white dark:bg-gray-900`}>
-                <div className="relative mr-3">
-                    <CachedAvatar
+            <div className={`${themeClasses.chatHeader} bg-white dark:bg-gray-900 flex-shrink-0`}>
+                <div className="flex items-center">
+                    <button
+                        onClick={() => navigate('/chat')}
+                        className="md:hidden p-2 mr-2 rounded-full hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors"
+                    >
+                        <svg className="w-5 h-5 text-gray-600 dark:text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
+                        </svg>
+                    </button>
+                    <img
                         src={chat.avatar}
                         alt={chat.name}
-                        className={themeClasses.avatar}
+                        className="w-10 h-10 rounded-full mr-3"
                     />
-                    {chat.isOnline && (
-                        <div className={themeClasses.onlineIndicator} />
-                    )}
-                </div>
-                <div>
-                    <h2 className="text-lg font-semibold text-gray-900 dark:text-gray-100">{chat.name}</h2>
-                    <p className="text-sm text-gray-500 dark:text-gray-400">
-                        {chat.isOnline ? 'Online' : 'Offline'}
-                    </p>
+                    <div>
+                        <h2 className="text-lg font-semibold text-gray-900 dark:text-gray-100">{chat.name}</h2>
+                        <p className="text-sm text-gray-500 dark:text-gray-400">
+                            {chat.isOnline ? 'Online' : 'Offline'}
+                        </p>
+                    </div>
                 </div>
             </div>
 
@@ -83,7 +98,7 @@ function ChatWindow({ chat, messages, onSendMessage }: ChatWindowProps) {
             </div>
 
             {/* Input Area */}
-            <div className="p-4 border-t border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-900">
+            <div className="p-4 border-t border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-900 flex-shrink-0">
                 <div className="flex items-end">
                     <textarea
                         value={newMessage}

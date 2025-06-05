@@ -27,7 +27,7 @@ function Chat() {
                     ? {
                         ...chat,
                         lastMessage: lastMessage.text,
-                        lastMessageTime: lastMessage.time
+                        lastMessageTime: formatMessageTime(new Date(lastMessage.time).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }))
                     }
                     : chat
             )
@@ -146,9 +146,9 @@ function Chat() {
     }, [])
 
     return (
-        <div className="h-[100dvh] flex overflow-hidden bg-white dark:bg-gray-900">
-            {/* Chat List - Always visible on desktop, conditionally on mobile */}
-            <div className={`${selectedChat ? 'hidden md:block' : 'block'} md:w-80 flex-shrink-0 border-r border-gray-200 dark:border-gray-700`}>
+        <div className="min-h-[100dvh] w-full flex flex-col md:flex-row bg-white dark:bg-gray-900">
+            {/* Chat List - Hidden on mobile when chat is selected */}
+            <div className={`h-full w-full md:w-80 flex-shrink-0 ${selectedChat ? 'hidden md:block' : 'block'}`}>
                 <ChatList
                     chats={chats}
                     selectedChat={selectedChat}
@@ -157,11 +157,12 @@ function Chat() {
                 />
             </div>
 
-            {/* Chat Window - Only shown when chat is selected */}
-            {selectedChat ? (
-                <div className="flex-1 min-w-0">
-                    {selectedChat.id === 'ai' ? (
+            {/* Chat Window - Full width on mobile */}
+            <div className={`h-full w-full flex-grow ${selectedChat ? 'block' : 'hidden md:block'}`}>
+                {selectedChat ? (
+                    selectedChat.id === 'ai' ? (
                         <AIChatWindow
+                            chat={selectedChat}
                             messages={messages}
                             onSendMessage={handleSendMessage}
                         />
@@ -171,14 +172,13 @@ function Chat() {
                             messages={messages}
                             onSendMessage={handleSendMessage}
                         />
-                    )}
-                </div>
-            ) : (
-                // Show message on desktop when no chat is selected
-                <div className="hidden md:flex items-center justify-center flex-1 bg-gray-50 dark:bg-gray-800">
-                    <p className="text-gray-500 dark:text-gray-400">Select a chat to start messaging</p>
-                </div>
-            )}
+                    )
+                ) : (
+                    <div className="min-h-[100dvh] w-full flex items-center justify-center bg-gray-50 dark:bg-gray-900">
+                        <p className="text-gray-500 dark:text-gray-400">Select a chat to start messaging</p>
+                    </div>
+                )}
+            </div>
         </div>
     )
 }
