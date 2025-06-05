@@ -2,7 +2,6 @@ import { useState } from 'react'
 import type { ChatData } from '../types/chat'
 import { themeClasses } from '../styles/theme'
 import { useTheme } from '../context/ThemeContext'
-import CachedAvatar from './CachedAvatar'
 import NewChatModal from './NewChatModal'
 
 interface ChatListProps {
@@ -20,10 +19,6 @@ function ChatList({ chats, selectedChat, onChatSelect, onAddChat }: ChatListProp
     // Separate AI chats from regular chats
     const aiChats = chats.filter(chat => chat.id === 'ai')
     const regularChats = chats.filter(chat => chat.id !== 'ai')
-
-    const filteredChats = chats.filter(chat =>
-        chat.name.toLowerCase().includes(searchQuery.toLowerCase())
-    )
 
     return (
         <div className="h-full w-full flex flex-col bg-white dark:bg-gray-900">
@@ -77,8 +72,8 @@ function ChatList({ chats, selectedChat, onChatSelect, onAddChat }: ChatListProp
                                     key={chat.id}
                                     onClick={() => onChatSelect(chat)}
                                     className={`w-full flex items-center p-3 rounded-lg transition-colors ${selectedChat?.id === chat.id
-                                            ? 'bg-blue-50 dark:bg-blue-900/20'
-                                            : 'hover:bg-gray-50 dark:hover:bg-gray-800'
+                                        ? 'bg-blue-50 dark:bg-blue-900/20'
+                                        : 'hover:bg-gray-50 dark:hover:bg-gray-800'
                                         }`}
                                 >
                                     <img
@@ -97,15 +92,17 @@ function ChatList({ chats, selectedChat, onChatSelect, onAddChat }: ChatListProp
                                                 </span>
                                             )}
                                         </div>
-                                        <p className="text-sm text-gray-500 dark:text-gray-400 truncate">
-                                            {chat.lastMessage || 'No messages yet'}
-                                        </p>
-                                    </div>
-                                    {chat.unreadCount > 0 && (
-                                        <div className="ml-2 bg-blue-500 text-white text-xs font-medium px-2 py-1 rounded-full">
-                                            {chat.unreadCount}
+                                        <div className="flex items-center justify-between">
+                                            <p className="text-sm text-gray-500 dark:text-gray-400 truncate">
+                                                {chat.lastMessage || 'No messages yet'}
+                                            </p>
+                                            {chat.unreadCount > 0 && (
+                                                <div className="ml-2 bg-blue-500 text-white text-xs font-medium px-2 py-1 rounded-full">
+                                                    {chat.unreadCount}
+                                                </div>
+                                            )}
                                         </div>
-                                    )}
+                                    </div>
                                 </button>
                             ))}
                         </div>
@@ -124,8 +121,8 @@ function ChatList({ chats, selectedChat, onChatSelect, onAddChat }: ChatListProp
                                     key={chat.id}
                                     onClick={() => onChatSelect(chat)}
                                     className={`w-full flex items-center p-3 rounded-lg transition-colors ${selectedChat?.id === chat.id
-                                            ? 'bg-blue-50 dark:bg-blue-900/20'
-                                            : 'hover:bg-gray-50 dark:hover:bg-gray-800'
+                                        ? 'bg-blue-50 dark:bg-blue-900/20'
+                                        : 'hover:bg-gray-50 dark:hover:bg-gray-800'
                                         }`}
                                 >
                                     <img
@@ -144,15 +141,17 @@ function ChatList({ chats, selectedChat, onChatSelect, onAddChat }: ChatListProp
                                                 </span>
                                             )}
                                         </div>
-                                        <p className="text-sm text-gray-500 dark:text-gray-400 truncate">
-                                            {chat.lastMessage || 'No messages yet'}
-                                        </p>
-                                    </div>
-                                    {chat.unreadCount > 0 && (
-                                        <div className="ml-2 bg-blue-500 text-white text-xs font-medium px-2 py-1 rounded-full">
-                                            {chat.unreadCount}
+                                        <div className="flex items-center justify-between">
+                                            <p className="text-sm text-gray-500 dark:text-gray-400 truncate">
+                                                {chat.lastMessage || 'No messages yet'}
+                                            </p>
+                                            {chat.unreadCount > 0 && (
+                                                <div className="ml-2 bg-blue-500 text-white text-xs font-medium px-2 py-1 rounded-full">
+                                                    {chat.unreadCount}
+                                                </div>
+                                            )}
                                         </div>
-                                    )}
+                                    </div>
                                 </button>
                             ))}
                         </div>
