@@ -103,9 +103,9 @@ function Chat() {
     }
 
     return (
-        <div className="h-[100dvh] flex overflow-hidden">
+        <div className="h-[100dvh] flex overflow-hidden bg-white dark:bg-gray-900">
             {/* Chat List - Always visible on desktop, conditionally on mobile */}
-            <div className={`${selectedChat ? 'hidden md:block' : 'block'} md:w-80 flex-shrink-0`}>
+            <div className={`${selectedChat ? 'hidden md:block' : 'block'} md:w-80 flex-shrink-0 border-r border-gray-200 dark:border-gray-700`}>
                 <ChatList
                     chats={chats}
                     selectedChat={selectedChat}
@@ -124,8 +124,8 @@ function Chat() {
                 </div>
             ) : (
                 // Show message on desktop when no chat is selected
-                <div className="hidden md:flex items-center justify-center flex-1 bg-[var(--background-secondary)]">
-                    <p className="text-[var(--text-secondary)]">Select a chat to start messaging</p>
+                <div className="hidden md:flex items-center justify-center flex-1 bg-gray-50 dark:bg-gray-800">
+                    <p className="text-gray-500 dark:text-gray-400">Select a chat to start messaging</p>
                 </div>
             )}
         </div>
