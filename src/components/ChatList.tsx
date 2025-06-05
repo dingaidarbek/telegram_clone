@@ -1,14 +1,15 @@
 import { useState } from 'react'
-import { Link, useParams } from 'react-router-dom'
 import type { ChatData } from '../types/chat'
 import { themeClasses } from '../styles/theme'
+import CachedAvatar from './CachedAvatar'
 
 interface ChatListProps {
     chats: ChatData[]
+    selectedChat: ChatData | null
+    onChatSelect: (chat: ChatData) => void
 }
 
-function ChatList({ chats }: ChatListProps) {
-    const { chatId } = useParams()
+function ChatList({ chats, selectedChat, onChatSelect }: ChatListProps) {
     const [searchQuery, setSearchQuery] = useState('')
 
     const filteredChats = chats.filter(chat =>
@@ -29,14 +30,14 @@ function ChatList({ chats }: ChatListProps) {
 
             <div className="flex-1 overflow-y-auto">
                 {filteredChats.map((chat) => (
-                    <Link
+                    <button
                         key={chat.id}
-                        to={`/chat/${chat.id}`}
-                        className={`block p-4 hover:bg-gray-50 transition-colors ${chatId === chat.id ? 'bg-gray-50' : ''}`}
+                        onClick={() => onChatSelect(chat)}
+                        className={`w-full text-left p-4 hover:bg-gray-50 transition-colors ${selectedChat?.id === chat.id ? 'bg-gray-50' : ''}`}
                     >
                         <div className="flex items-center space-x-3">
                             <div className="relative">
-                                <img
+                                <CachedAvatar
                                     src={chat.avatar}
                                     alt={chat.name}
                                     className="w-12 h-12 rounded-full"
@@ -66,7 +67,7 @@ function ChatList({ chats }: ChatListProps) {
                                 </div>
                             </div>
                         </div>
-                    </Link>
+                    </button>
                 ))}
             </div>
         </div>

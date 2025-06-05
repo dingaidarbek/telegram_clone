@@ -2,6 +2,9 @@ import { useState, useRef, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
 import type { Message, ChatData } from '../types/chat'
 import { themeClasses } from '../styles/theme'
+import CachedAvatar from './CachedAvatar'
+import MessageGroup from './MessageGroup'
+import { getMessageDate } from '../utils/date'
 
 interface ChatWindowProps {
     chat: ChatData
@@ -41,8 +44,23 @@ function ChatWindow({ chat, messages, onSendMessage }: ChatWindowProps) {
         navigate('/chat')
     }
 
+    // Group messages by date
+    const groupedMessages = messages.reduce<Message[][]>((groups, message) => {
+        const messageDate = getMessageDate(message.time)
+        const lastGroup = groups[groups.length - 1]
+
+        if (!lastGroup || getMessageDate(lastGroup[0].time).getDate() !== messageDate.getDate()) {
+            groups.push([message])
+        } else {
+            lastGroup.push(message)
+        }
+
+        return groups
+    }, [])
+
     return (
-        <div className="h-full flex flex-col md:w-full">
+        <div className="h-full flex flex-col">
+            {/* Fixed header */}
             <div className={`${themeClasses.chatHeader} flex-shrink-0`}>
                 <div className="flex items-center space-x-3">
                     <button
@@ -54,7 +72,7 @@ function ChatWindow({ chat, messages, onSendMessage }: ChatWindowProps) {
                         </svg>
                     </button>
                     <div className="relative flex-shrink-0">
-                        <img
+                        <CachedAvatar
                             src={chat.avatar}
                             alt={chat.name}
                             className="w-10 h-10 rounded-full"
@@ -72,45 +90,38 @@ function ChatWindow({ chat, messages, onSendMessage }: ChatWindowProps) {
                 </div>
             </div>
 
-            <div className="flex-1 overflow-y-auto p-4 space-y-4">
-                {messages.map((message) => (
-                    <div
-                        key={message.id}
-                        className={`flex ${message.isOutgoing ? 'justify-end' : 'justify-start'}`}
-                    >
-                        <div
-                            className={`max-w-[70%] rounded-lg p-3 ${message.isOutgoing ? themeClasses.messageOut : themeClasses.messageIn
-                                }`}
-                        >
-                            <p className="whitespace-pre-wrap">{message.text}</p>
-                            <span className="text-xs text-[var(--text-secondary)] mt-1 block">
-                                {message.time}
-                            </span>
-                        </div>
-                    </div>
-                ))}
-                <div ref={messagesEndRef} />
+            {/* Scrollable messages area */}
+            <div className="flex-1 overflow-y-auto">
+                <div className="p-4 space-y-4">
+                    {groupedMessages.map((group, index) => (
+                        <MessageGroup key={index} messages={group} />
+                    ))}
+                    <div ref={messagesEndRef} />
+                </div>
             </div>
 
-            <form onSubmit={handleSubmit} className={`${themeClasses.inputArea} flex-shrink-0`}>
-                <div className="flex items-end gap-2">
-                    <textarea
-                        value={newMessage}
-                        onChange={(e) => setNewMessage(e.target.value)}
-                        onKeyDown={handleKeyDown}
-                        placeholder="Type a message... (Shift + Enter for new line)"
-                        className="flex-1 bg-transparent outline-none resize-none min-h-[40px] max-h-[120px]"
-                        rows={1}
-                    />
-                    <button
-                        type="submit"
-                        disabled={!newMessage.trim()}
-                        className="bg-[var(--primary-blue)] text-white px-4 py-2 rounded-lg hover:bg-[var(--dark-blue)] transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex-shrink-0"
-                    >
-                        Send
-                    </button>
-                </div>
-            </form>
+            {/* Fixed input area */}
+            <div className="flex-shrink-0">
+                <form onSubmit={handleSubmit} className={themeClasses.inputArea}>
+                    <div className="flex items-end gap-2">
+                        <textarea
+                            value={newMessage}
+                            onChange={(e) => setNewMessage(e.target.value)}
+                            onKeyDown={handleKeyDown}
+                            placeholder="Type a message... (Shift + Enter for new line)"
+                            className="flex-1 bg-transparent outline-none resize-none min-h-[40px] max-h-[120px]"
+                            rows={1}
+                        />
+                        <button
+                            type="submit"
+                            disabled={!newMessage.trim()}
+                            className="bg-[var(--primary-blue)] text-white px-4 py-2 rounded-lg hover:bg-[var(--dark-blue)] transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex-shrink-0"
+                        >
+                            Send
+                        </button>
+                    </div>
+                </form>
+            </div>
         </div>
     )
 }

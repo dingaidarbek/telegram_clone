@@ -37,12 +37,14 @@ export const messages: Record<string, Message[]> = {
     '1': [
         {
             id: '1',
+            chatId: '1',
             text: 'Hey, how are you?',
             time: '10:30 AM',
             isOutgoing: false
         },
         {
             id: '2',
+            chatId: '1',
             text: 'I\'m good, thanks! How about you?',
             time: '10:31 AM',
             isOutgoing: true
@@ -51,18 +53,21 @@ export const messages: Record<string, Message[]> = {
     '2': [
         {
             id: '1',
+            chatId: '2',
             text: 'Are we still meeting tomorrow?',
             time: 'Yesterday',
             isOutgoing: false
         },
         {
             id: '2',
+            chatId: '2',
             text: 'Yes, at 2 PM!',
             time: 'Yesterday',
             isOutgoing: true
         },
         {
             id: '3',
+            chatId: '2',
             text: 'See you tomorrow!',
             time: 'Yesterday',
             isOutgoing: false
@@ -71,18 +76,21 @@ export const messages: Record<string, Message[]> = {
     '3': [
         {
             id: '1',
+            chatId: '3',
             text: 'Can you help me with the project?',
             time: 'Yesterday',
             isOutgoing: false
         },
         {
             id: '2',
+            chatId: '3',
             text: 'Of course! What do you need?',
             time: 'Yesterday',
             isOutgoing: true
         },
         {
             id: '3',
+            chatId: '3',
             text: 'Thanks for the help!',
             time: 'Yesterday',
             isOutgoing: false
