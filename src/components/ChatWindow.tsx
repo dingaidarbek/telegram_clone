@@ -2,7 +2,6 @@ import { useState, useRef, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
 import type { Message, ChatData } from '../types/chat'
 import { themeClasses } from '../styles/theme'
-import { useTheme } from '../context/ThemeContext'
 import MessageGroup from './MessageGroup'
 import { getMessageDate } from '../utils/date'
 
