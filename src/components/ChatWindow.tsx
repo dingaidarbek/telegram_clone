@@ -1,5 +1,4 @@
 import { useState, useRef, useEffect } from 'react'
-import { useNavigate } from 'react-router-dom'
 import type { Message, ChatData } from '../types/chat'
 import { themeClasses } from '../styles/theme'
 import CachedAvatar from './CachedAvatar'
@@ -15,7 +14,6 @@ interface ChatWindowProps {
 function ChatWindow({ chat, messages, onSendMessage }: ChatWindowProps) {
     const [newMessage, setNewMessage] = useState('')
     const messagesEndRef = useRef<HTMLDivElement>(null)
-    const navigate = useNavigate()
 
     const scrollToBottom = () => {
         messagesEndRef.current?.scrollIntoView({ behavior: 'auto' })
@@ -38,10 +36,6 @@ function ChatWindow({ chat, messages, onSendMessage }: ChatWindowProps) {
             e.preventDefault()
             handleSubmit(e)
         }
-    }
-
-    const handleBack = () => {
-        navigate('/chat')
     }
 
     // Group messages by date
