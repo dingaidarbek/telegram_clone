@@ -8,7 +8,11 @@ import type { Message, ChatData } from '../types/chat'
 import { storage } from '../utils/storage'
 import { formatMessageTime } from '../utils/date'
 
-function Chat() {
+interface ChatProps {
+    onToggleStats: () => void
+}
+
+function Chat({ onToggleStats }: ChatProps) {
     const { chatId } = useParams<{ chatId: string }>()
     const navigate = useNavigate()
     const [selectedChat, setSelectedChat] = useState<ChatData | null>(null)
@@ -64,9 +68,6 @@ function Chat() {
             } else {
                 navigate('/chat')
             }
-        } else {
-            setSelectedChat(null)
-            setMessages([])
         }
     }, [chatId, navigate])
 
@@ -146,35 +147,38 @@ function Chat() {
     }, [])
 
     return (
-        <div className="min-h-[100dvh] w-full flex flex-col md:flex-row bg-white dark:bg-gray-900">
-            {/* Chat List - Hidden on mobile when chat is selected */}
-            <div className={`h-full w-full md:w-80 flex-shrink-0 ${selectedChat ? 'hidden md:block' : 'block'}`}>
+        <div className="h-full w-full flex flex-col md:flex-row bg-white dark:bg-gray-900 overflow-hidden">
+            {/* Chat List - Always visible on desktop, conditionally on mobile */}
+            <div className={`h-full w-full md:w-80 flex-shrink-0 overflow-y-auto ${selectedChat ? 'hidden md:block' : 'block'}`}>
                 <ChatList
                     chats={chats}
                     selectedChat={selectedChat}
                     onChatSelect={handleChatSelect}
                     onAddChat={handleAddChat}
+                    onToggleStats={onToggleStats}
                 />
             </div>
 
             {/* Chat Window - Full width on mobile */}
-            <div className={`h-full w-full flex-grow ${selectedChat ? 'block' : 'hidden md:block'}`}>
+            <div className={`h-full w-full flex-grow flex flex-col ${selectedChat ? 'block' : 'hidden md:block'}`}>
                 {selectedChat ? (
                     selectedChat.id === 'ai' ? (
                         <AIChatWindow
                             chat={selectedChat}
                             messages={messages}
                             onSendMessage={handleSendMessage}
+                            onToggleStats={onToggleStats}
                         />
                     ) : (
                         <ChatWindow
                             chat={selectedChat}
                             messages={messages}
                             onSendMessage={handleSendMessage}
+                            onToggleStats={onToggleStats}
                         />
                     )
                 ) : (
-                    <div className="min-h-[100dvh] w-full flex items-center justify-center bg-gray-50 dark:bg-gray-900">
+                    <div className="h-full w-full flex items-center justify-center bg-gray-50 dark:bg-gray-900">
                         <p className="text-gray-500 dark:text-gray-400">Select a chat to start messaging</p>
                     </div>
                 )}
